@@ -1,0 +1,13 @@
+groq
+edge-tts
+pygame
+sounddevice
+numpy
+pyautogui
+pygetwindow
+selenium
+webdriver-manager
+customtkinter
+python-dotenv
+pvporcupine
+Pillow
