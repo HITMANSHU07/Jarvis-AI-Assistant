@@ -1,6 +1,6 @@
 # 🤖 Jarvis AI — Bilingual Voice Desktop Assistant
 
-> A production-grade, hands-free AI assistant that understands Roman Hindi & English,
+> A production-grade, hands-free AI assistant that understands  Hindi & English,
 > speaks with a neural female voice, and performs live desktop automation.
 
 ![Python](https://img.shields.io/badge/Python-3.11-blue?style=flat-square&logo=python)
@@ -11,7 +11,7 @@
 
 ## ✨ Features
 
-- 🎙️ **Bilingual STT** — Groq Whisper (Roman Hindi + English)
+- 🎙️ **Bilingual STT** — Groq Whisper (Hindi + English)
 - 🧠 **AI Brain** — LLaMA 3.3-70B via Groq (ultra-fast inference)
 - 🔊 **Neural TTS** — Microsoft Edge-TTS female voice
 - 💬 **WhatsApp Automation** — sends messages via desktop GUI
