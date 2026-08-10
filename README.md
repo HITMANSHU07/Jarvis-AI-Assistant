@@ -95,4 +95,5 @@ Copyright (c) 2026 **Himanshu Kumar**
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software.
 
-MIT License — Free to use, edit, and modify. Created with ❤️ by **Himanshu Kumar**.
+MIT License — Free to use, edit, and modify. Created with <img width="148" height="148" alt="image" src="https://github.com/user-attachments/assets/2e07b942-d5f7-4925-a168-254706bf779e" />
+ by **Himanshu Kumar**.
