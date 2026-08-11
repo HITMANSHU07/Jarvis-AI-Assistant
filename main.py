@@ -59,7 +59,7 @@ class JarvisEngine:
         self.recognizer = sr.Recognizer()
         
         # High Accuracy Mic Tuning
-        self.recognizer.energy_threshold = 200      # Sensitive to normal speaking voice
+        self.recognizer.energy_threshold = 200      # Sensitive to normal speaking sound
         self.recognizer.dynamic_energy_threshold = True
         self.recognizer.pause_threshold = 0.6         # Fast response (doesn't wait long after you stop speaking)
         
@@ -84,7 +84,7 @@ class JarvisEngine:
                         self.app.add_user_message(text)
                         self.process_command(text)
                 except sr.UnknownValueError:
-                    pass  # Ignore unrecognized noise quietly
+                    pass  (# Ignore unrecognized noise quietly)
                 except Exception as e:
                     print("Background listener error:", e)
                     time.sleep(0.5)
