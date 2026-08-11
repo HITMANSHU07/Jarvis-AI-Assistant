@@ -21,7 +21,7 @@
 
 ---
 
-## 🚀 Quick Start
+#£# 🚀 Quick Start
 
 ### 1. Clone the repo
 ```bash
@@ -47,7 +47,7 @@ python main.py
 
 ---
 
-## 🗂️ Project Structure
+### 🗂️ Project Structure
 
 ```text
 jarvis-ai/
