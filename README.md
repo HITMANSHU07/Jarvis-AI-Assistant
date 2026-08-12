@@ -1,4 +1,4 @@
-# 🤖 Jarvis AI — Bilingual Voice Desktop Assistant
+### 🤖 Jarvis AI — Bilingual Voice Desktop Assistant
 
 > A production-grade, hands-free AI assistant that understands  Hindi & English,
 > speaks with a neural female voice, and performs live desktop automation.
@@ -9,7 +9,7 @@
 
 ---
 
-## ✨ Features
+### ✨ Features
 
 - 🎙️ **Bilingual STT** — Groq Whisper (Hindi + English)
 - 🧠 **AI Brain** — LLaMA 3.3-70B via Groq (ultra-fast inference)
