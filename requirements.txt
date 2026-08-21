@@ -11,3 +11,7 @@ customtkinter
 python-dotenv
 pvporcupine
 Pillow
+speechrecognition
+pyaudio
+requests
+pyttsx3
