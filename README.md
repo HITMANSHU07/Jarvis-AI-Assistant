@@ -1,30 +1,31 @@
-# 🤖 Jarvis AI — Bilingual Voice Desktop Assistant
+# 🤖 Jarvis AI — Continuous Bilingual Voice Desktop Assistant
 
-> A production-grade, hands-free AI assistant that understands Hindi & English, speaks with a neural female voice, and performs live desktop automation.
+> A production-grade, continuous voice AI assistant that understands Hinglish & English, speaks with natural neural voice, and performs live desktop automation.
 
-![Python](https://img.shields.io/badge/Python-3.11-blue?style=flat-square\&logo=python)
+![Python](https://img.shields.io/badge/Python-3.11+-blue?style=flat-square&logo=python)
 ![Groq](https://img.shields.io/badge/LLM-Groq%20LLaMA%203.3-orange?style=flat-square)
+![STT](https://img.shields.io/badge/STT-Whisper%20Large%20v3-green?style=flat-square)
+![TTS](https://img.shields.io/badge/TTS-Edge--TTS%20Neural-purple?style=flat-square)
 ![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
 
 ---
 
-## 🚀 Project Links
+## 🚀 Repository Link
 
-* 💻 **[GitHub Repository](https://github.com/HITMANSHU07/Jarvis-AI-Assistant)**
-* 🎥 **Demo Video:** Coming Soon
-* 🌐 **Live Demo:** Not available yet — Jarvis is currently a desktop application.
+* 💻 **GitHub Repository:** [https://github.com/HITMANSHU07/Jarvis-AI-Assistant](https://github.com/HITMANSHU07/Jarvis-AI-Assistant)
 
 ---
 
 ## ✨ Features
 
-* 🎙️ **Bilingual STT** — Groq Whisper (Hindi + English)
-* 🧠 **AI Brain** — LLaMA 3.3-70B via Groq (ultra-fast inference)
-* 🔊 **Neural TTS** — Microsoft Edge-TTS female voice
-* 💬 **WhatsApp Automation** — sends messages via desktop GUI
-* ▶️ **YouTube Control** — voice-activated browser playback
-* ⚙️ **System Control** — shutdown, mute, close windows
-* 🖥️ **Professional GUI** — CustomTkinter dark theme dashboard
+* 🎙️ **Continuous Voice Listening Mode ("Always-On")** — Once turned on, Jarvis stays active continuously. Automatically pauses mic listening while speaking (TTS) to prevent feedback loops, then resumes listening immediately.
+* ⚡ **High-Accuracy STT (Groq Whisper Large v3)** — Dynamic Voice Activity Detection (VAD) with ambient noise adjustment. Ultra-fast transcription of Hinglish, Hindi, and English with Google STT fallback.
+* 🧠 **AI Brain (Groq LLaMA 3.3-70B)** — Ultra-fast response generation in natural, concise Hinglish.
+* 🔊 **Neural TTS (Microsoft Edge-TTS)** — High-quality male neural voice (`en-US-GuyNeural` / `hi-IN-MadhurNeural`) with pyttsx3 fallback.
+* 📱 **WhatsApp Automation** — Voice-controlled instant WhatsApp message sending.
+* ▶️ **YouTube & Media Controls** — Search/play YouTube videos, exact volume percentage control (e.g. *"volume 40%"*), mute, play/pause, next/prev track.
+* 🖥️ **App Launcher & System Controls** — Launch desktop apps (Chrome, Notepad, Calc, VS Code, Spotify, CMD, Explorer, Settings), take screenshots, lock screen, system status (CPU, RAM, Battery report), shutdown/restart timer.
+* 🎨 **Cyberpunk Dashboard GUI** — CustomTkinter dark theme dashboard with real-time waveform audio monitor, status pill, and system metrics.
 
 ---
 
@@ -45,11 +46,13 @@ pip install -r requirements.txt
 
 ### 3. Configure Environment
 
-Create a `.env` file and add your API key:
+Create a `.env` file in the root directory and add your Groq API key:
 
 ```env
 GROQ_API_KEY=your_groq_api_key_here
 ```
+
+*(Get your free API key at [Groq Console](https://console.groq.com))*
 
 ### 4. Run Jarvis
 
@@ -57,84 +60,64 @@ GROQ_API_KEY=your_groq_api_key_here
 python main.py
 ```
 
+- Click the **🎤 Mic button** to activate Continuous Voice Mode.
+- Speak your commands naturally in Hinglish or English.
+- Say *"Stop listening"* or click the Mic button again to stop.
+
 ---
 
 ## 🗂️ Project Structure
 
 ```text
 Jarvis-AI-Assistant/
-├── main.py                    # Application entry point
-├── config.py                  # Settings & system prompts
+├── main.py                    # Application entry point & core orchestrator
+├── config.py                  # API keys, voice settings & prompts
+├── requirements.txt           # Dependencies
 ├── core/
-│   ├── stt_engine.py          # Speech-to-Text (Groq Whisper)
-│   ├── llm_brain.py           # AI reasoning (LLaMA 3.3)
-│   ├── tts_engine.py          # Text-to-Speech (Edge-TTS)
-│   └── wake_word.py           # "Jarvis" trigger detection
+│   ├── stt_engine.py          # Speech-to-Text (Groq Whisper v3 + VAD + Google STT)
+│   ├── tts_engine.py          # Text-to-Speech (Edge-TTS Neural + pyttsx3 fallback)
+│   ├── llm_brain.py           # AI reasoning (LLaMA 3.3 70B via Groq)
+│   └── wake_word.py           # Trigger word detector
 ├── automation/
-│   ├── whatsapp_bot.py        # WhatsApp desktop automation
-│   ├── browser_bot.py         # Browser automation
-│   └── system_control.py      # System-level controls
+│   ├── system_control.py      # App launcher, system metrics, volume & screenshot controls
+│   ├── whatsapp_bot.py        # WhatsApp Web automation
+│   └── browser_bot.py         # Browser automation
 ├── gui/
-│   ├── app_window.py          # Main dashboard
-│   ├── waveform_widget.py     # Voice waveform UI
-│   └── chat_log.py            # Conversation history
+│   ├── app_window.py          # CustomTkinter main GUI dashboard
+│   ├── waveform_widget.py     # Live audio waveform visualizer
+│   └── chat_log.py            # Conversation log component
 └── utils/
-    └── helpers.py             # Utility functions
+    └── helpers.py             # System stats, logging & time utilities
 ```
-
----
-
-## 🔑 API Keys Required
-
-| Service                | Purpose   | Get it at                                         |
-| ---------------------- | --------- | ------------------------------------------------- |
-| Groq                   | LLM + STT | [Groq Console](https://console.groq.com)          |
-| Picovoice *(optional)* | Wake Word | [Picovoice Console](https://console.picovoice.ai) |
-
-> ⚠️ Never commit your `.env` file or expose your API keys publicly.
 
 ---
 
 ## 🎯 How Jarvis Works
 
 ```text
-🎙️ User Voice
+🎙️ Continuous Mic Input (VAD)
       ↓
-🎧 Speech Recognition
+⚡ Groq Whisper Large v3 (Hinglish STT)
       ↓
-🧠 Groq LLaMA AI
+🧠 Groq LLaMA 3.3 70B AI Brain
       ↓
-⚙️ Intent / Command Processing
+⚙️ Intent / Action Execution (Apps, Volume, Web, WhatsApp)
       ↓
-💻 Desktop Automation
-      ↓
-🔊 Neural Voice Response
+🔊 Microsoft Edge-TTS Neural Voice Response
 ```
-
----
-
-## 🖥️ Application
-
-Jarvis is designed as a **desktop AI assistant** rather than a traditional web application.
-
-It can listen to voice commands, understand Hindi and English, process requests using an LLM, speak responses, and perform supported desktop and browser automation tasks.
 
 ---
 
 ## 👥 Author & Creator
 
-| Name               | Role                     |
-| ------------------ | ------------------------ |
+| Name | Role |
+| :--- | :--- |
 | **Himanshu Kumar** | Lead Developer & Creator |
 
 ---
 
 ## 📄 License
 
-Copyright (c) 2026 **Himanshu Kumar**
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software.
-
-MIT License — Free to use, edit, and modify.
+MIT License — Free to use, modify, and distribute.
 
 Created with 🤖 by **Himanshu Kumar**.
