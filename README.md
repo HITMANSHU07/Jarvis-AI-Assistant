@@ -1,6 +1,6 @@
-# 🤖 Jarvis AI — Continuous Bilingual Voice Desktop Assistant
+# 🤖 Jarvis AI — Continuous Bilingual Voice Assistant & Desktop Automation
 
-> A production-grade, continuous voice AI assistant that understands Hinglish & English, speaks with natural neural voice, and performs live desktop automation.
+> A production-grade, continuous voice AI assistant that understands Hinglish & English, speaks with natural neural voice, and performs live desktop & web automation.
 
 ![Python](https://img.shields.io/badge/Python-3.11+-blue?style=flat-square&logo=python)
 ![Groq](https://img.shields.io/badge/LLM-Groq%20LLaMA%203.3-orange?style=flat-square)
@@ -10,15 +10,18 @@
 
 ---
 
-## 🚀 Repository Link
+## 🚀 Repository & Live Demo Links
 
 * 💻 **GitHub Repository:** [https://github.com/HITMANSHU07/Jarvis-AI-Assistant](https://github.com/HITMANSHU07/Jarvis-AI-Assistant)
+* 🌐 **Web Voice Assistant Demo:** Run `python web_server.py` to open the Web Voice Assistant in any browser!
+* 🌐 **GitHub Pages Live Demo:** [https://hitmanshu07.github.io/Jarvis-AI-Assistant](https://hitmanshu07.github.io/Jarvis-AI-Assistant)
 
 ---
 
 ## ✨ Features
 
 * 🎙️ **Continuous Voice Listening Mode ("Always-On")** — Once turned on, Jarvis stays active continuously. Automatically pauses mic listening while speaking (TTS) to prevent feedback loops, then resumes listening immediately.
+* 🌐 **Web & Desktop Dual Interface** — Use the rich Cyberpunk CustomTkinter Desktop GUI app or the browser Web Voice Assistant.
 * ⚡ **High-Accuracy STT (Groq Whisper Large v3)** — Dynamic Voice Activity Detection (VAD) with ambient noise adjustment. Ultra-fast transcription of Hinglish, Hindi, and English with Google STT fallback.
 * 🧠 **AI Brain (Groq LLaMA 3.3-70B)** — Ultra-fast response generation in natural, concise Hinglish.
 * 🔊 **Neural TTS (Microsoft Edge-TTS)** — High-quality male neural voice (`en-US-GuyNeural` / `hi-IN-MadhurNeural`) with pyttsx3 fallback.
@@ -54,15 +57,25 @@ GROQ_API_KEY=your_groq_api_key_here
 
 *(Get your free API key at [Groq Console](https://console.groq.com))*
 
-### 4. Run Jarvis
+---
+
+## 🖥️ Running Jarvis
+
+### Option A: Desktop AI Assistant GUI (Full System Controls)
 
 ```bash
 python main.py
 ```
+- Full desktop control (apps, volume %, screenshots, lock screen, WhatsApp, YouTube).
+- Click the **🎤 Mic button** to toggle Continuous Voice Listening.
 
-- Click the **🎤 Mic button** to activate Continuous Voice Mode.
-- Speak your commands naturally in Hinglish or English.
-- Say *"Stop listening"* or click the Mic button again to stop.
+### Option B: Web AI Assistant Demo (Browser Voice AI)
+
+```bash
+python web_server.py
+```
+- Opens local Web Assistant server at `http://localhost:8000`.
+- Works in Google Chrome, Microsoft Edge, Brave, and Opera with browser Web Speech API.
 
 ---
 
@@ -70,9 +83,12 @@ python main.py
 
 ```text
 Jarvis-AI-Assistant/
-├── main.py                    # Application entry point & core orchestrator
+├── main.py                    # Desktop Application entry point & core orchestrator
+├── web_server.py              # Web Voice Assistant local server launcher
 ├── config.py                  # API keys, voice settings & prompts
 ├── requirements.txt           # Dependencies
+├── web/
+│   └── index.html             # Web AI Voice Assistant interface
 ├── core/
 │   ├── stt_engine.py          # Speech-to-Text (Groq Whisper v3 + VAD + Google STT)
 │   ├── tts_engine.py          # Text-to-Speech (Edge-TTS Neural + pyttsx3 fallback)
@@ -88,22 +104,6 @@ Jarvis-AI-Assistant/
 │   └── chat_log.py            # Conversation log component
 └── utils/
     └── helpers.py             # System stats, logging & time utilities
-```
-
----
-
-## 🎯 How Jarvis Works
-
-```text
-🎙️ Continuous Mic Input (VAD)
-      ↓
-⚡ Groq Whisper Large v3 (Hinglish STT)
-      ↓
-🧠 Groq LLaMA 3.3 70B AI Brain
-      ↓
-⚙️ Intent / Action Execution (Apps, Volume, Web, WhatsApp)
-      ↓
-🔊 Microsoft Edge-TTS Neural Voice Response
 ```
 
 ---
