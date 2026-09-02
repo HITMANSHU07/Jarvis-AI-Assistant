@@ -10,7 +10,9 @@ PICOVOICE_KEY = os.getenv("PICOVOICE_KEY", "")
 
 LLM_MODEL = "llama-3.3-70b-versatile"
 WHISPER_MODEL = "whisper-large-v3"
-TTS_VOICE = "en-IN-PrabhatNeural"
+
+# Voice Settings
+TTS_VOICE = "en-US-GuyNeural" # Male voice
 
 SYSTEM_PROMPT = """
 You are Jarvis, a fast, witty, and intelligent AI assistant.

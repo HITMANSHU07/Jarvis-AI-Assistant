@@ -15,3 +15,7 @@ speechrecognition
 pyaudio
 requests
 pyttsx3
+pywhatkit
+pycaw
+comtypes
+psutil

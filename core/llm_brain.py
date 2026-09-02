@@ -1,34 +1,51 @@
 import json
 import re
+import logging
 from groq import Groq
-from config import GROQ_API_KEY, LLM_MODEL
+import config
 
-client = Groq(api_key=GROQ_API_KEY)
+logger = logging.getLogger(__name__)
+
 conversation_history = []
 
-# DYNAMIC PROMPT: Naam fix nahi hai, AI ab logic seekhega
 SYSTEM_PROMPT = """
-You are Jarvis, a professional and extremely concise AI assistant.
+You are Jarvis, an ultra-fast, intelligent, and polite AI voice assistant. Always start with "Jai Shree Ram" if greeted.
 STRICT RULES:
-1. Always reply in Roman Urdu.
-2. LIMIT: Maximum 1 sentence. 
-3. If the user gives a CLEAR COMMAND, you MUST output a JSON object inside <ACTION> tags.
-4. Format: "Reply text here <ACTION>{"type": "...", "contact": "...", "message": "...", "query": "..."}</ACTION>"
-5. If the user says "message [NAME] [TEXT]", identify [NAME] as contact and [TEXT] as message.
-6. If the user says "play [SONG] on YouTube", identify [SONG] as query and set type to "youtube".
+1. Always communicate in simple, concise, and natural Hinglish (mix of Hindi & English written in Latin script).
+2. Keep responses very short (maximum 1-2 sentences) so voice synthesis is quick and conversational.
+3. If the user asks you to perform an action (e.g. WhatsApp message, YouTube search, open app, volume control, etc.), output a JSON action inside <ACTION> tags at the end of your response.
+   Example formats:
+   - "Mummy ko WhatsApp message bhej raha hu. <ACTION>{"type": "whatsapp", "contact": "mummy", "message": "mai aa raha hu"}</ACTION>"
+   - "YouTube par lofi songs search kar raha hu. <ACTION>{"type": "youtube", "query": "lofi songs"}</ACTION>"
+   - "Volume 50 percent set kar diya. <ACTION>{"type": "volume", "value": 50}</ACTION>"
+   - "Calculator khol raha hu. <ACTION>{"type": "open_app", "app": "calculator"}</ACTION>"
+4. If no specific action tag is needed, respond naturally without <ACTION> tags.
 """
 
+def clear_history():
+    global conversation_history
+    conversation_history = []
+
 def get_response(user_input: str) -> tuple[str, dict | None]:
+    global conversation_history
+
+    api_key = getattr(config, "GROQ_API_KEY", "")
+    if not api_key:
+        return "Groq API key `.env` file mein config nahi hai. Kripya API key add karein.", None
+
     conversation_history.append({"role": "user", "content": user_input})
-    if len(conversation_history) > 10:
-        conversation_history.pop(0)
+    if len(conversation_history) > 12:
+        conversation_history = conversation_history[-12:]
     
     try:
+        client = Groq(api_key=api_key)
+        model_name = getattr(config, "LLM_MODEL", "llama-3.3-70b-versatile")
+        
         response = client.chat.completions.create(
-            model=LLM_MODEL,
+            model=model_name,
             messages=[{"role": "system", "content": SYSTEM_PROMPT}] + conversation_history,
-            temperature=0.1, 
-            max_tokens=512
+            temperature=0.3,
+            max_tokens=256
         )
         
         full_reply = response.choices[0].message.content.strip()
@@ -43,11 +60,11 @@ def get_response(user_input: str) -> tuple[str, dict | None]:
                 json_str = action_match.group(1).strip()
                 action = json.loads(json_str)
             except Exception as e:
-                print(f"DEBUG: JSON Parse Error: {e}")
+                logger.error(f"Action JSON parse error: {e}")
         
         spoken_reply = re.sub(r'<ACTION>.*?</ACTION>', '', full_reply, flags=re.DOTALL).strip()
         return spoken_reply, action
         
     except Exception as e:
-        print(f"DEBUG: LLM Error: {e}")
-        return "Main abhi thora busy hoon, thori der mein baat karte hain.", None
+        logger.error(f"LLM Error: {e}")
+        return "Abhi server connection error aa raha hai, thodi der baad try karein.", None

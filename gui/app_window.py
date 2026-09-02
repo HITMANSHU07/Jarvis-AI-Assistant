@@ -4,25 +4,6 @@ gui/app_window.py
 Ultra-professional Jarvis AI dashboard built with CustomTkinter.
 Dark cyberpunk-minimal aesthetic: deep navy blacks, cyan & violet accents,
 clean grid layout, smooth status transitions, and real-time feedback.
-
-Layout
-------
-┌─────────────────────────────────────────────────────────────┐
-│   Header: Logo · Title · Status pill · Session timer        │
-├──────────────────────────┬──────────────────────────────────┤
-│                          │  Right sidebar                   │
-│   Chat log               │  ┌──────────────────────────┐   │
-│   (scrollable)           │  │  Waveform visualizer     │   │
-│                          │  └──────────────────────────┘   │
-│                          │  ┌──────────────────────────┐   │
-│                          │  │  System metrics panel    │   │
-│                          │  └──────────────────────────┘   │
-│                          │  ┌──────────────────────────┐   │
-│                          │  │  Quick action buttons    │   │
-│                          │  └──────────────────────────┘   │
-├──────────────────────────┴──────────────────────────────────┤
-│   Input bar: text field · Send · Mic button · Wake toggle    │
-└─────────────────────────────────────────────────────────────┘
 """
 
 import threading
@@ -80,22 +61,7 @@ STATUS_COLOURS = {
     "error":     (C_RED,     "✕  Error"),
 }
 
-
-# ---------------------------------------------------------------------------
-# Main application window
-# ---------------------------------------------------------------------------
-
 class JarvisApp:
-    """
-    Main Jarvis GUI.  Instantiate, then call .run() on the main thread.
-
-    Parameters
-    ----------
-    assistant_loop : callable
-        The blocking function that runs the STT → LLM → TTS loop.
-        It will be executed in a daemon thread so the GUI stays responsive.
-    """
-
     def __init__(self, assistant_loop: Optional[Callable] = None):
         self._assistant_loop = assistant_loop
         self._assistant_thread: Optional[threading.Thread] = None
@@ -110,14 +76,10 @@ class JarvisApp:
         self._start_clock()
         self._start_stats_updater()
         
-        # Initial greeting set to Jai Shree Ram
-        self.add_jarvis_message("Jai Shree Ram! I am Jarvis.")
+        self.add_jarvis_message("Jai Shree Ram! I am Jarvis. Click the Mic button or speak to begin.")
 
-    # ===================================================================
-    # Public API (called from the assistant core)
-    # ===================================================================
     def waveform_set_state(self, state: str) -> None:
-        """Helper to sync main.py with the waveform widget."""
+        """Helper to sync app state with the waveform widget."""
         self._waveform.set_state(state)
         
     def run(self) -> None:
@@ -145,11 +107,18 @@ class JarvisApp:
         self._root.after(0, lambda: self._chat.add_system(text))
 
     def set_status(self, state: str) -> None:
-        """
-        Update the status pill and waveform.
-        States: idle | listening | thinking | speaking | executing | error
-        """
+        """Update the status pill and waveform widget."""
         self._root.after(0, lambda: self._apply_status(state))
+
+    def set_mic_active(self, active: bool) -> None:
+        """Update the mic button visual state."""
+        self._mic_active = active
+        def _update_ui():
+            if active:
+                self._mic_btn.configure(fg_color="#006040", text_color=C_GREEN, border_color=C_GREEN)
+            else:
+                self._mic_btn.configure(fg_color=C_BG_INPUT, text_color=C_TEXT_1, border_color=C_BORDER)
+        self._root.after(0, _update_ui)
 
     # ===================================================================
     # Build helpers
@@ -163,45 +132,24 @@ class JarvisApp:
         self._root.configure(fg_color=C_BG_ROOT)
         self._root.protocol("WM_DELETE_WINDOW", self._on_close)
 
-        # Main grid: header / content / input
         self._root.grid_rowconfigure(1, weight=1)
         self._root.grid_columnconfigure(0, weight=1)
 
-    # -------------------------------------------------------------------
     def _build_header(self) -> None:
-        header = ctk.CTkFrame(
-            self._root, fg_color=C_BG_SURFACE,
-            corner_radius=0, height=64,
-        )
+        header = ctk.CTkFrame(self._root, fg_color=C_BG_SURFACE, corner_radius=0, height=64)
         header.grid(row=0, column=0, sticky="ew")
         header.grid_columnconfigure(1, weight=1)
         header.grid_propagate(False)
 
-        # Logo mark
-        logo_dot = ctk.CTkLabel(
-            header, text="◈", font=("Segoe UI", 22),
-            text_color=C_CYAN, width=40,
-        )
+        logo_dot = ctk.CTkLabel(header, text="◈", font=("Segoe UI", 22), text_color=C_CYAN, width=40)
         logo_dot.grid(row=0, column=0, padx=(16, 4), pady=14)
 
-        # Title
-        ctk.CTkLabel(
-            header, text="JARVIS", font=FONT_LOGO,
-            text_color=C_TEXT_1,
-        ).grid(row=0, column=1, sticky="w", padx=4)
+        ctk.CTkLabel(header, text="JARVIS", font=FONT_LOGO, text_color=C_TEXT_1).grid(row=0, column=1, sticky="w", padx=4)
+        ctk.CTkLabel(header, text="AI Desktop Assistant", font=FONT_SMALL, text_color=C_TEXT_2).grid(row=0, column=2, sticky="w", padx=(0, 24))
 
-        ctk.CTkLabel(
-            header, text="AI Desktop Assistant",
-            font=FONT_SMALL, text_color=C_TEXT_2,
-        ).grid(row=0, column=2, sticky="w", padx=(0, 24))
-
-        # Spacer
-        ctk.CTkFrame(header, fg_color="transparent").grid(
-            row=0, column=3, sticky="ew"
-        )
+        ctk.CTkFrame(header, fg_color="transparent").grid(row=0, column=3, sticky="ew")
         header.grid_columnconfigure(3, weight=1)
 
-        # Status pill
         self._status_pill = ctk.CTkLabel(
             header,
             text="●  Idle",
@@ -213,30 +161,20 @@ class JarvisApp:
         )
         self._status_pill.grid(row=0, column=4, padx=8)
 
-        # Session timer
-        self._timer_label = ctk.CTkLabel(
-            header, text="00:00:00",
-            font=FONT_MONO, text_color=C_TEXT_3,
-        )
+        self._timer_label = ctk.CTkLabel(header, text="00:00:00", font=FONT_MONO, text_color=C_TEXT_3)
         self._timer_label.grid(row=0, column=5, padx=(0, 16))
 
-        # Thin bottom border
-        ctk.CTkFrame(self._root, fg_color=C_BORDER, height=1).grid(
-            row=0, column=0, sticky="sew"
-        )
+        ctk.CTkFrame(self._root, fg_color=C_BORDER, height=1).grid(row=0, column=0, sticky="sew")
 
-    # -------------------------------------------------------------------
     def _build_content(self) -> None:
         content = ctk.CTkFrame(self._root, fg_color="transparent")
         content.grid(row=1, column=0, sticky="nsew", padx=0, pady=0)
         content.grid_rowconfigure(0, weight=1)
         content.grid_columnconfigure(0, weight=1)
 
-        # ---- Chat log (left / main column) ----
         self._chat = ChatLog(content, width=580)
         self._chat.grid(row=0, column=0, sticky="nsew", padx=(12, 6), pady=12)
 
-        # ---- Right sidebar ----
         sidebar = ctk.CTkFrame(content, fg_color="transparent", width=320)
         sidebar.grid(row=0, column=1, sticky="nsew", padx=(6, 12), pady=12)
         sidebar.grid_propagate(False)
@@ -247,7 +185,6 @@ class JarvisApp:
         self._build_metrics_card(sidebar)
         self._build_actions_card(sidebar)
 
-    # -------------------------------------------------------------------
     def _build_waveform_card(self, parent) -> None:
         card = ctk.CTkFrame(parent, fg_color=C_BG_CARD, corner_radius=12)
         card.grid(row=0, column=0, sticky="ew", pady=(0, 8))
@@ -262,28 +199,25 @@ class JarvisApp:
         self._waveform.grid(row=1, column=0, padx=14, pady=(0, 12))
         self._waveform.start()
 
-        # State indicator row
         row = ctk.CTkFrame(card, fg_color="transparent")
         row.grid(row=2, column=0, sticky="ew", padx=14, pady=(0, 12))
 
         self._wave_state_label = ctk.CTkLabel(
-            row, text="Waiting for wake word…",
+            row, text="Waiting for wake word or mic activation…",
             font=FONT_SMALL, text_color=C_TEXT_3,
         )
         self._wave_state_label.pack(side="left")
 
-    # -------------------------------------------------------------------
     def _build_metrics_card(self, parent) -> None:
         card = ctk.CTkFrame(parent, fg_color=C_BG_CARD, corner_radius=12)
         card.grid(row=1, column=0, sticky="ew", pady=(0, 8))
         card.grid_columnconfigure((0, 1), weight=1)
 
         ctk.CTkLabel(
-            card, text="SYSTEM",
+            card, text="SYSTEM METRICS",
             font=("Segoe UI Semibold", 10), text_color=C_TEXT_3,
         ).grid(row=0, column=0, columnspan=2, sticky="w", padx=14, pady=(10, 6))
 
-        # Metric tiles
         metrics = [
             ("CPU", "cpu_val"),
             ("RAM", "ram_val"),
@@ -296,20 +230,13 @@ class JarvisApp:
             row = 1 + idx // 2
             tile = ctk.CTkFrame(card, fg_color=C_BG_SURFACE, corner_radius=8)
             tile.grid(row=row, column=col, padx=(14 if col == 0 else 4, 4 if col == 0 else 14), pady=3, sticky="ew")
-            ctk.CTkLabel(
-                tile, text=label, font=FONT_SMALL, text_color=C_TEXT_3,
-            ).pack(pady=(6, 0))
-            val = ctk.CTkLabel(
-                tile, text="—", font=("Segoe UI Semibold", 14), text_color=C_CYAN,
-            )
+            ctk.CTkLabel(tile, text=label, font=FONT_SMALL, text_color=C_TEXT_3).pack(pady=(6, 0))
+            val = ctk.CTkLabel(tile, text="—", font=("Segoe UI Semibold", 14), text_color=C_CYAN)
             val.pack(pady=(0, 6))
             self._metric_labels[key] = val
 
-        ctk.CTkFrame(card, fg_color="transparent", height=4).grid(
-            row=3, column=0, columnspan=2
-        )
+        ctk.CTkFrame(card, fg_color="transparent", height=4).grid(row=3, column=0, columnspan=2)
 
-    # -------------------------------------------------------------------
     def _build_actions_card(self, parent) -> None:
         card = ctk.CTkFrame(parent, fg_color=C_BG_CARD, corner_radius=12)
         card.grid(row=2, column=0, sticky="ew", pady=(0, 0))
@@ -350,24 +277,16 @@ class JarvisApp:
                 pady=3, sticky="ew",
             )
 
-        ctk.CTkFrame(card, fg_color="transparent", height=4).grid(
-            row=4, column=0, columnspan=2
-        )
+        ctk.CTkFrame(card, fg_color="transparent", height=4).grid(row=4, column=0, columnspan=2)
 
-    # -------------------------------------------------------------------
     def _build_input_bar(self) -> None:
-        bar = ctk.CTkFrame(
-            self._root, fg_color=C_BG_SURFACE,
-            corner_radius=0, height=64,
-        )
+        bar = ctk.CTkFrame(self._root, fg_color=C_BG_SURFACE, corner_radius=0, height=64)
         bar.grid(row=2, column=0, sticky="ew")
         bar.grid_columnconfigure(1, weight=1)
         bar.grid_propagate(False)
 
-        # Top divider
         ctk.CTkFrame(bar, fg_color=C_BORDER, height=1).place(x=0, y=0, relwidth=1)
 
-        # Wake-word toggle
         self._wake_var = ctk.BooleanVar(value=True)
         wake_toggle = ctk.CTkSwitch(
             bar,
@@ -381,14 +300,11 @@ class JarvisApp:
             command=self._toggle_wake,
         )
         wake_toggle.grid(row=0, column=0, padx=(14, 4), pady=14)
-        ctk.CTkLabel(
-            bar, text="Wake", font=FONT_SMALL, text_color=C_TEXT_3,
-        ).grid(row=0, column=0, padx=(56, 0))
+        ctk.CTkLabel(bar, text="Wake", font=FONT_SMALL, text_color=C_TEXT_3).grid(row=0, column=0, padx=(56, 0))
 
-        # Text input
         self._text_input = ctk.CTkEntry(
             bar,
-            placeholder_text="Type a command or speak after saying 'Jarvis'…",
+            placeholder_text="Type a command or click mic to start continuous listening…",
             font=FONT_BODY,
             fg_color=C_BG_INPUT,
             border_color=C_BORDER,
@@ -400,7 +316,6 @@ class JarvisApp:
         self._text_input.grid(row=0, column=1, sticky="ew", padx=8, pady=13)
         self._text_input.bind("<Return>", self._on_text_send)
 
-        # Send button
         send_btn = ctk.CTkButton(
             bar,
             text="Send",
@@ -415,7 +330,6 @@ class JarvisApp:
         )
         send_btn.grid(row=0, column=2, padx=(0, 6), pady=13)
 
-        # Mic button
         self._mic_btn = ctk.CTkButton(
             bar,
             text="🎤",
@@ -432,10 +346,6 @@ class JarvisApp:
         )
         self._mic_btn.grid(row=0, column=3, padx=(0, 14), pady=13)
 
-    # ===================================================================
-    # Status & clock
-    # ===================================================================
-
     def _apply_status(self, state: str) -> None:
         colour, label = STATUS_COLOURS.get(state, (C_TEXT_3, "● Unknown"))
         self._status_pill.configure(text=label, text_color=colour)
@@ -445,11 +355,11 @@ class JarvisApp:
             "idle"
         )
         wave_msg = {
-            "idle":      "Waiting for wake word…",
-            "listening": "Listening…",
-            "thinking":  "Processing request…",
-            "speaking":  "Speaking…",
-            "executing": "Running automation…",
+            "idle":      "Waiting for command…",
+            "listening": "Continuous Listening… Speak now!",
+            "thinking":  "Processing command…",
+            "speaking":  "Jarvis is speaking…",
+            "executing": "Executing action…",
             "error":     "An error occurred.",
         }.get(state, "")
         self._wave_state_label.configure(text=wave_msg, text_color=colour)
@@ -478,17 +388,12 @@ class JarvisApp:
     def _inc_message_count(self) -> None:
         self._message_count += 1
 
-    # ===================================================================
-    # Button callbacks
-    # ===================================================================
-
     def _on_text_send(self, _event=None) -> None:
         text = self._text_input.get().strip()
         if not text:
             return
         self._text_input.delete(0, "end")
         self.add_user_message(text)
-        # Pass to assistant brain if available
         if hasattr(self, "_on_text_command"):
             threading.Thread(
                 target=self._on_text_command,
@@ -497,19 +402,11 @@ class JarvisApp:
             ).start()
 
     def _on_mic_press(self) -> None:
-        if not self._mic_active:
-            self._mic_active = True
-            self._mic_btn.configure(fg_color=C_VIOLET_DIM, text_color=C_VIOLET)
-            self.add_system("Manual mic triggered — speak now.")
-            if hasattr(self, "_on_mic_command"):
-                threading.Thread(
-                    target=self._on_mic_command,
-                    daemon=True,
-                ).start()
-        else:
-            self._mic_active = False
-            self._mic_btn.configure(fg_color=C_BG_INPUT, text_color=C_TEXT_1)
-            self.set_status("idle")   
+        if hasattr(self, "_on_mic_command"):
+            threading.Thread(
+                target=self._on_mic_command,
+                daemon=True,
+            ).start()
 
     def _toggle_wake(self) -> None:
         state = self._wake_var.get()
@@ -517,10 +414,14 @@ class JarvisApp:
         self.add_system(msg)
 
     def _cmd_youtube(self):
-        self.add_system("Opening YouTube browser automation…")
+        import webbrowser
+        webbrowser.open("https://youtube.com")
+        self.add_system("Opening YouTube…")
 
     def _cmd_whatsapp(self):
-        self.add_system("Opening WhatsApp Desktop automation…")
+        import webbrowser
+        webbrowser.open("https://web.whatsapp.com")
+        self.add_system("Opening WhatsApp Web…")
 
     def _cmd_mute(self):
         from automation.system_control import mute_volume
@@ -535,6 +436,8 @@ class JarvisApp:
     def _cmd_clear(self):
         self._chat.clear()
         self._message_count = 0
+        from core.llm_brain import clear_history
+        clear_history()
 
     def _cmd_shutdown(self):
         self.add_system("Shutdown initiated in 5 seconds…")
