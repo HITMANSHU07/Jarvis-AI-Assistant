@@ -1,3 +1,4 @@
+import sys
 import asyncio
 import edge_tts
 import pygame
@@ -8,6 +9,11 @@ import threading
 import pyttsx3
 import config
 from utils.helpers import clean_text_for_tts
+
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+if hasattr(sys.stderr, 'reconfigure'):
+    sys.stderr.reconfigure(encoding='utf-8', errors='replace')
 
 # Global speaking lock and state flag
 _speaking_lock = threading.Lock()
@@ -83,7 +89,7 @@ def speak(text: str, voice: str = None) -> None:
                 _speak_pyttsx3(cleaned_text)
                 return
 
-            if tmp_path and os.path.exists(tmp_path):
+            if tmp_path and os.path.exists(tmp_path) and os.path.getsize(tmp_path) > 100:
                 try:
                     pygame.mixer.music.load(tmp_path)
                     pygame.mixer.music.play()
@@ -100,6 +106,8 @@ def speak(text: str, voice: str = None) -> None:
                             os.remove(tmp_path)
                         except Exception:
                             pass
+            else:
+                _speak_pyttsx3(cleaned_text)
         finally:
             is_tts_speaking = False
             _update_status("idle")

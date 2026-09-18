@@ -1,9 +1,15 @@
+import sys
 import io
 import time
 import logging
 import speech_recognition as sr
 from groq import Groq
 import config
+
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+if hasattr(sys.stderr, 'reconfigure'):
+    sys.stderr.reconfigure(encoding='utf-8', errors='replace')
 
 logger = logging.getLogger(__name__)
 

@@ -1,3 +1,4 @@
+import sys
 import os
 import re
 import time
@@ -5,6 +6,11 @@ import threading
 import difflib
 import speech_recognition as sr
 import pyautogui
+
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+if hasattr(sys.stderr, 'reconfigure'):
+    sys.stderr.reconfigure(encoding='utf-8', errors='replace')
 
 import config
 from gui.app_window import JarvisApp
@@ -357,6 +363,15 @@ class JarvisEngine:
             self.app.set_status("idle")
 
 def start_assistant():
+    # Launch Web Server HUD in background daemon thread
+    try:
+        from web_server import run_server
+        web_thread = threading.Thread(target=run_server, kwargs={"open_browser": True}, daemon=True)
+        web_thread.start()
+        print("🌐 Web Assistant HUD server running on http://localhost:8000")
+    except Exception as e:
+        print("Web server auto-start warning:", e)
+
     app = JarvisApp()
     engine = JarvisEngine(app)
 
@@ -364,9 +379,9 @@ def start_assistant():
     app._on_text_command = engine.process_command
     app._on_mic_command = engine.toggle_mic
 
-    welcome_msg = "Jai Shree Ram! Jarvis is online. Voice listening ek baar ON hone par continuous chalti rahegi."
+    welcome_msg = "Jai Shree Ram! Jarvis is online. Desktop Window & Web HUD (http://localhost:8000) are both active."
     app.add_jarvis_message(welcome_msg)
-    speak(welcome_msg)
+    threading.Thread(target=speak, args=(welcome_msg,), daemon=True).start()
 
     app.run()
 

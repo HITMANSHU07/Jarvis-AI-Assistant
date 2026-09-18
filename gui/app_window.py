@@ -138,17 +138,32 @@ class JarvisApp:
     def _build_header(self) -> None:
         header = ctk.CTkFrame(self._root, fg_color=C_BG_SURFACE, corner_radius=0, height=64)
         header.grid(row=0, column=0, sticky="ew")
-        header.grid_columnconfigure(1, weight=1)
+        header.grid_columnconfigure(3, weight=1)
         header.grid_propagate(False)
 
         logo_dot = ctk.CTkLabel(header, text="◈", font=("Segoe UI", 22), text_color=C_CYAN, width=40)
         logo_dot.grid(row=0, column=0, padx=(16, 4), pady=14)
 
         ctk.CTkLabel(header, text="JARVIS", font=FONT_LOGO, text_color=C_TEXT_1).grid(row=0, column=1, sticky="w", padx=4)
-        ctk.CTkLabel(header, text="AI Desktop Assistant", font=FONT_SMALL, text_color=C_TEXT_2).grid(row=0, column=2, sticky="w", padx=(0, 24))
+        ctk.CTkLabel(header, text="AI Desktop Assistant", font=FONT_SMALL, text_color=C_TEXT_2).grid(row=0, column=2, sticky="w", padx=(0, 16))
 
         ctk.CTkFrame(header, fg_color="transparent").grid(row=0, column=3, sticky="ew")
-        header.grid_columnconfigure(3, weight=1)
+
+        # Master Power ON/OFF Toggle Button
+        self._power_active = True
+        self._power_btn = ctk.CTkButton(
+            header,
+            text="⚡ POWER: ON",
+            font=("Segoe UI Semibold", 11),
+            width=110,
+            height=32,
+            fg_color="#006040",
+            hover_color="#008050",
+            text_color=C_GREEN,
+            corner_radius=16,
+            command=self._toggle_power,
+        )
+        self._power_btn.grid(row=0, column=4, padx=8)
 
         self._status_pill = ctk.CTkLabel(
             header,
@@ -159,10 +174,10 @@ class JarvisApp:
             corner_radius=20,
             padx=12, pady=4,
         )
-        self._status_pill.grid(row=0, column=4, padx=8)
+        self._status_pill.grid(row=0, column=5, padx=8)
 
         self._timer_label = ctk.CTkLabel(header, text="00:00:00", font=FONT_MONO, text_color=C_TEXT_3)
-        self._timer_label.grid(row=0, column=5, padx=(0, 16))
+        self._timer_label.grid(row=0, column=6, padx=(0, 16))
 
         ctk.CTkFrame(self._root, fg_color=C_BORDER, height=1).grid(row=0, column=0, sticky="sew")
 
@@ -249,11 +264,11 @@ class JarvisApp:
 
         actions = [
             ("▶  YouTube",   self._cmd_youtube),
+            ("🌐  Web HUD",  self._cmd_web_hud),
             ("💬  WhatsApp", self._cmd_whatsapp),
             ("🔇  Mute",     self._cmd_mute),
             ("✕  Close Win", self._cmd_close_win),
             ("🗑  Clear Log", self._cmd_clear),
-            ("⏻  Shutdown",  self._cmd_shutdown),
         ]
         for idx, (label, cmd) in enumerate(actions):
             col = idx % 2
@@ -412,6 +427,22 @@ class JarvisApp:
         state = self._wake_var.get()
         msg = "Wake-word detection enabled." if state else "Wake-word detection paused."
         self.add_system(msg)
+
+    def _toggle_power(self):
+        self._power_active = not self._power_active
+        if self._power_active:
+            self._power_btn.configure(text="⚡ POWER: ON", fg_color="#006040", text_color=C_GREEN)
+            self.set_status("idle")
+            self.add_system("Jarvis Master System Power TURNED ON.")
+        else:
+            self._power_btn.configure(text="⚡ POWER: OFF", fg_color="#601010", text_color=C_RED)
+            self.set_status("offline")
+            self.add_system("Jarvis Master System Power TURNED OFF.")
+
+    def _cmd_web_hud(self):
+        import webbrowser
+        webbrowser.open("http://localhost:8000")
+        self.add_system("Opening Quantum Web HUD (http://localhost:8000)…")
 
     def _cmd_youtube(self):
         import webbrowser

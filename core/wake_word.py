@@ -47,21 +47,30 @@ class WakeWordDetector:
         if self._thread: self._thread.join(timeout=3)
 
     def _listener_loop(self):
-        with self._microphone as source:
-            self._recognizer.adjust_for_ambient_noise(source, duration=1)
-            while True:
-                with self._state_lock:
-                    if self._state == ListenerState.STOPPED: break
-                
-                try:
-                    # Timeout ko None karo taake mic hamesha sunta rahe
-                    audio = self._recognizer.listen(source, timeout=None, phrase_time_limit=5)
-                    text = self._recognise(audio)
-                    if text and any(w in text for w in WAKE_WORDS):
-                        self._handle_wake(source) 
-                except:
-                    time.sleep(0.1)
-                    continue
+        while True:
+            with self._state_lock:
+                if self._state == ListenerState.STOPPED:
+                    break
+            try:
+                with sr.Microphone() as source:
+                    self._recognizer.adjust_for_ambient_noise(source, duration=0.8)
+                    while True:
+                        with self._state_lock:
+                            if self._state == ListenerState.STOPPED:
+                                break
+                        try:
+                            audio = self._recognizer.listen(source, timeout=3, phrase_time_limit=5)
+                            text = self._recognise(audio)
+                            if text and any(w in text for w in WAKE_WORDS):
+                                self._handle_wake(source)
+                        except sr.WaitTimeoutError:
+                            continue
+                        except Exception as e:
+                            logger.error(f"Wake word listening error: {e}")
+                            break
+            except Exception as e:
+                logger.error(f"Microphone init error in wake word: {e}")
+                time.sleep(1.0)
 
     def _handle_wake(self, source):
         # State ko pause karein taake loop conflict na kare
