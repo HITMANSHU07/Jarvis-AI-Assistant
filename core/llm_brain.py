@@ -39,14 +39,26 @@ def get_response(user_input: str) -> tuple[str, dict | None]:
     
     try:
         client = Groq(api_key=api_key)
-        model_name = getattr(config, "LLM_MODEL", "llama-3.3-70b-versatile")
+        primary_model = getattr(config, "LLM_MODEL", "groq/compound")
+        fallback_models = [primary_model, "groq/compound", "openai/gpt-oss-20b", "qwen/qwen3.8-27b"]
         
-        response = client.chat.completions.create(
-            model=model_name,
-            messages=[{"role": "system", "content": SYSTEM_PROMPT}] + conversation_history,
-            temperature=0.3,
-            max_tokens=256
-        )
+        response = None
+        last_err = None
+        for m in dict.fromkeys(fallback_models):
+            try:
+                response = client.chat.completions.create(
+                    model=m,
+                    messages=[{"role": "system", "content": SYSTEM_PROMPT}] + conversation_history,
+                    temperature=0.3,
+                    max_tokens=256
+                )
+                if response: break
+            except Exception as err:
+                last_err = err
+                logger.warning(f"Groq model '{m}' failed: {err}")
+
+        if not response:
+            raise last_err or RuntimeError("No Groq models responded.")
         
         full_reply = response.choices[0].message.content.strip()
         conversation_history.append({"role": "assistant", "content": full_reply})

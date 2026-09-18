@@ -8,7 +8,7 @@ load_dotenv(dotenv_path=env_path)
 GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
 PICOVOICE_KEY = os.getenv("PICOVOICE_KEY", "")
 
-LLM_MODEL = "llama-3.3-70b-versatile"
+LLM_MODEL = "groq/compound"
 WHISPER_MODEL = "whisper-large-v3"
 
 # Voice Settings

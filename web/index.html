@@ -856,6 +856,17 @@
             }
         }
 
+        async function checkServerStatus() {
+            try {
+                const res = await fetch('/api/status');
+                const data = await res.json();
+                if (data.power !== undefined && data.power !== isPowerOn) {
+                    toggleMasterPower();
+                }
+            } catch(e) {}
+        }
+        checkServerStatus();
+
         powerSwitch.addEventListener('click', toggleMasterPower);
 
         function setAssistantState(state) {
